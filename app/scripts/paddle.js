@@ -7,18 +7,21 @@ Paddle.prototype = {
 	mainFrame: null,
 	x: 0,
 	y: 0,
-	distanceX: 30,
+	distanceX: 40,
 	width: 75,
 	height: 10,
+	bInit: true,
 	
 	initialize: function(context, frame) {
 		this.mainContext = context;
 		this.mainFrame = frame;
 		this.x = parseInt(this.mainFrame.size.width / 2 - this.width / 2);
 		this.y = parseInt(this.mainFrame.size.height);
-		
-		this.draw();
-		this.bindEvent();
+
+        if (this.bInit) {
+		    this.bindEvent();
+		    this.bInit = false;
+        }
 	},
 	
 	draw: function() {

@@ -24,8 +24,13 @@ Ball.prototype = {
 		this.y = parseInt(this.mainFrame.size.height / 2);
 		this.initX = this.x%2;
 		this.initY = this.y%2;
-		
-		this.draw();
+		if (this.distanceY > 0) {
+            this.distanceY = -1 * this.distanceY;
+        }
+        this.crashX = false;
+        this.crashY = false;
+        this.crashPaddle = false;
+        this.crashBlock = false;
 	},
 		
 	draw: function() {

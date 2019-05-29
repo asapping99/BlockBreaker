@@ -12,6 +12,8 @@ Game.prototype = {
 	rowsBlock: 2,
 	colsBlock: 2,
 	totalBlock: 0,
+	countStage: 1,
+	score: 0,
 	
 	mainFrame: {
 		size: {
@@ -71,6 +73,7 @@ Game.prototype = {
 	},
 	
 	makeBlocks: function() {
+	    this.blocks = null;
 		this.blocks = new Array(this.colsBlock);
 		for (var i = 0; i < this.blocks.length; i++) {
 			this.blocks[i] = new Array(this.rowsBlock);
@@ -109,7 +112,9 @@ Game.prototype = {
 		if (!this.paddle) {
 			this.paddle = new Paddle(this.mainContext, this.mainFrame);
 		}
-				
+
+	    this.showScore();
+	    this.showStage();
 		this.processing = setInterval(function() {
 			self.draw();
 		}, this.interval);
@@ -151,6 +156,7 @@ Game.prototype = {
 	
 	end: function() {
 		var self = this;
+        alert("The End!!");
 		if (this.startBtn) {
 			this.startBtn.remove();
 		}
@@ -158,7 +164,66 @@ Game.prototype = {
 		app.game = null;
 		initialize();
 	},
-	
+
+	nextStage: function() {
+	    var currentStage = this.countStage;
+	    clearInterval(this.processing);
+        this.countStage = this.countStage + 1;
+        this.showStage();
+
+        if (this.rowsBlock <= 6) {
+            this.rowsBlock = this.rowsBlock + 2;
+        }
+        if (this.colsBlock <= 14) {
+            this.colsBlock = this.colsBlock + 2;
+        }
+        this.totalBlock = this.rowsBlock * this.colsBlock;
+
+        if (this.ball) {
+            if (this.countStage == 10) {
+                this.ball.distanceX = this.ball.distanceX + 1;
+                this.ball.distanceY = this.ball.distanceY - 1;
+            }
+            this.ball.initialize(this.mainContext, this.mainFrame);
+        }
+        if (this.paddle) {
+            this.paddle.initialize(this.mainContext, this.mainFrame);
+        }
+
+        alert("Stage " + currentStage + ' Clear!!');
+        this.start();
+	},
+
+    showScore: function() {
+        var scoreText = 'SCORE : ' + this.score;
+        var scoreTextSize = this.mainContext.measureText(scoreText);
+        this.mainContext.beginPath();
+        this.mainContext.clearRect(10, 0, scoreTextSize.width, 40);
+        this.mainContext.fillStyle = '#dfdfdf';
+        this.mainContext.fillRect(10, 0, scoreTextSize.width, 40);
+        this.mainContext.closePath();
+
+        this.mainContext.beginPath();
+        this.mainContext.fillStyle = '#222';
+        this.mainContext.fillText(scoreText, 10, 40);
+        this.mainContext.closePath();
+    },
+
+    showStage: function() {
+        var stageText = 'STAGE : ' + this.countStage;
+        var stageTextSize = this.mainContext.measureText(stageText);
+        this.mainContext.beginPath();
+        this.mainContext.clearRect(this.mainFrame.size.width - stageTextSize.width, 0, stageTextSize.width, 40);
+        this.mainContext.fillStyle = '#dfdfdf';
+        this.mainContext.fillRect(this.mainFrame.size.width - stageTextSize.width, 0, stageTextSize.width, 40);
+        this.mainContext.closePath();
+
+        this.mainContext.beginPath();
+        this.mainContext.fillStyle = '#222';
+        this.mainContext.fillText(stageText, this.mainFrame.size.width - stageTextSize.width, 40);
+        this.mainContext.closePath();
+    },
+
 	collisionPaddle: function() {
 		for (var i = 0; i < this.blocks.length; i++) {
 			for (var j = 0; j < this.blocks[i].length; j++) {
@@ -166,14 +231,18 @@ Game.prototype = {
 				var blockY = this.blocks[i][j].y;
 				var blockW = this.blocks[i][j].width;
 				var blockH = this.blocks[i][j].height;
-				if (this.ball.x >= blockX && this.ball.x <= blockX + blockW + 10 && this.ball.y - blockH - 10 <= blockY) {
+				if (this.ball.x >= blockX && this.ball.x <= blockX + blockW + 10 && this.ball.y - blockH - 5 <= blockY) {
 					this.ball.crashBlock = true;
 					this.blocks[i][j].remove();
 					this.totalBlock = this.totalBlock - 1;
-					console.log(this.totalBlock);
+					this.score = this.score + 100;
+					this.showScore();
 					if (this.totalBlock == 0) {
-						alert("승리하였습니다.!!!!!!");
-						this.end();
+					    if (this.countStage == 15) {
+					        this.end();
+					    } else {
+						    this.nextStage();
+					    }
 					}
 					break;
 				}
@@ -185,7 +254,6 @@ Game.prototype = {
 			this.ball.y > this.paddle.y && this.ball.y < this.paddle.y + 5) {
 			this.ball.crashPaddle = true;
 		} else if (this.ball.y >= this.mainFrame.size.height+30) {
-			alert("게임종료");
 			this.end();
 		}
 	}
