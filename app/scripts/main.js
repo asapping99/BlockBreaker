@@ -6,8 +6,9 @@ var app = {
 		height: window.innerHeight - 20
 	}
 };
-
+var mainApp = null;
 var execute = function() {
+	mainApp = document.getElementById('mainApp');
 	app.context = mainApp.getContext('2d');
 	resizeApp();
 	initialize();
